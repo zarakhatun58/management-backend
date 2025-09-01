@@ -10,6 +10,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/reset-password", resetPassword);
 router.get("/profile", verifyToken, getProfile);
+
 router.post("/logout", verifyToken, (req, res) => {
     const token = req.headers["authorization"]?.split(" ")[1];
     res.json({ message: "Logged out successfully" });
