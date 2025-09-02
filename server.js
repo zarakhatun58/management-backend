@@ -5,7 +5,13 @@ import { fileURLToPath } from 'url';
 import schoolRoutes from './routes/schoolRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import dotenv from "dotenv";
-dotenv.config();
+
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -16,4 +22,10 @@ app.use('/schoolImages', express.static(path.join(__dirname, 'schoolImages')));
 app.use('/api', schoolRoutes);
 app.use("/api/auth", authRoutes);
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+
+app.get('/', (req, res) => res.send('Backend is up 🎉'));
+app.get('/health', (req, res) => res.json({ ok: true }));
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
