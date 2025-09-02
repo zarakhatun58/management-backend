@@ -4,7 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import schoolRoutes from './routes/schoolRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-
+import dotenv from "dotenv";
+dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
