@@ -1,15 +1,8 @@
 import mysql from "mysql2";
 import dotenv from "dotenv";
 import path from "path";
+dotenv.config()
 
-// Load env file only in local development
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-  console.log("✅ Loaded local .env file");
-}
-
-console.log("🌍 Environment:", process.env.NODE_ENV);
-console.log("ENV DB_HOST:", process.env.DB_HOST || process.env.MYSQLHOST);
 
 const db = mysql.createConnection({
   host: process.env.MYSQLHOST || process.env.DB_HOST,

@@ -6,9 +6,7 @@ import schoolRoutes from './routes/schoolRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import dotenv from "dotenv";
 
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config();
-}
+dotenv.config();
 
 
 
@@ -16,7 +14,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+origin: [
+    "https://school-frontend-gia9.onrender.com",
+],
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use('/schoolImages', express.static(path.join(__dirname, 'schoolImages')));
 app.use('/api', schoolRoutes);
