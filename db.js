@@ -1,7 +1,13 @@
 import mysql from "mysql2";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
 
+
+const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env.local";
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
+
+console.log("Loaded ENV file:", envFile);
+console.log("ENV DB_HOST:", process.env.DB_HOST);
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,

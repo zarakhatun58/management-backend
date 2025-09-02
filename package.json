@@ -5,7 +5,8 @@
   "main": "db.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "cross-env NODE_ENV=development node server.js",
+    "start:prod": "cross-env NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "",
@@ -21,5 +22,8 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.14.4",
     "nodemailer": "^7.0.6"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0"
   }
 }
