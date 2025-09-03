@@ -55,15 +55,18 @@ export function createSchool(req, res) {
   `;
 
   db.query(sql, [
-    safeValue(name),
-    safeValue(address),
-    safeValue(city),
-    safeValue(state),
-    safeValue(contact),
-    safeValue(image),
-    safeValue(email_id),
-  ], (err, result) => {
-    if (err) return res.status(500).json(err);
+  safeValue(name),
+  safeValue(address),
+  safeValue(city),
+  safeValue(state),
+  safeValue(contact),
+  safeValue(image),
+  safeValue(email_id),
+], (err, result) => {
+  if (err) {
+    console.error("❌ Insert error:", err); 
+    return res.status(500).json({ error: err.message }); 
+  }
 
     const insertedId = result.insertId;
     db.query('SELECT * FROM schools WHERE id=?', [insertedId], (err2, rows) => {
