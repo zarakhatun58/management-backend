@@ -15,13 +15,14 @@ export function getSchools(req, res) {
       results = JSON.parse(jsonData);
     }
 
-    const search = (q || "").toLowerCase();
+   const search = (q || "").toLowerCase();
 
-    const filtered = results.filter((school) => {
-      const name = school?.name ? String(school.name) : "";
-      const city = school?.city ? String(school.city) : "";
-      return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
-    });
+const filtered = results.filter((school) => {
+  const name = school?.name || ""; 
+  const city = school?.city || ""; 
+
+  return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
+});
 
     const pageNum = parseInt(page);
     const pageLimit = parseInt(limit);
@@ -40,11 +41,25 @@ export function getSchools(req, res) {
 
 
 export function createSchool(req, res) {
-  const { name, address, city, state, contact, email_id } = req.body;
-  const image = req.file ? req.file.filename : null;
+  const safeValue = (v) => v ?? "";
 
-  const sql = 'INSERT INTO schools (name,address,city,state,contact,image,email_id) VALUES (?,?,?,?,?,?,?)';
-  db.query(sql, [name, address, city, state, contact, image, email_id], (err, result) => {
+  const { name, address, city, state, contact, email_id } = req.body;
+  const image = req.file ? req.file.filename : "";
+
+  const sql = `
+    INSERT INTO schools (name, address, city, state, contact, image, email_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [
+    safeValue(name),
+    safeValue(address),
+    safeValue(city),
+    safeValue(state),
+    safeValue(contact),
+    safeValue(image),
+    safeValue(email_id),
+  ], (err, result) => {
     if (err) return res.status(500).json(err);
 
     const insertedId = result.insertId;
@@ -54,6 +69,7 @@ export function createSchool(req, res) {
     });
   });
 }
+
 export function updateSchool(req, res) {
   const { id } = req.params;
   const { name, address, city, state, contact, email_id } = req.body;
@@ -73,7 +89,7 @@ export function updateSchool(req, res) {
 
     db.query('SELECT * FROM schools WHERE id=?', [id], (err2, rows) => {
       if (err2) return res.status(500).json(err2);
-      res.json({ message: "School updated successfully", school: rows[0] });
+      res.json({ message: "School updated successfully", school: rows[0] }); 
     });
   });
 }
