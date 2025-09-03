@@ -15,13 +15,14 @@ export function getSchools(req, res) {
       results = JSON.parse(jsonData);
     }
 
-    const search = q.toLowerCase();
+   const search = (q || "").toLowerCase();
 
-    const filtered = results.filter((school) => {
-      const name = school.name || "";
-      const city = school.city || "";
-      return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
-    });
+const filtered = results.filter((school) => {
+  const name = school?.name || ""; 
+  const city = school?.city || ""; 
+
+  return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
+});
 
     const pageNum = parseInt(page);
     const pageLimit = parseInt(limit);
