@@ -1,31 +1,45 @@
 
 import { readFileSync } from 'fs';
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import { join } from 'path';
-import { getAllSchools } from '../models/schoolModel.js';
+import {
+  getAllSchools,
+  addSchool,
+  getSchoolById as getSchoolByIdModel,
+  updateSchool as updateSchoolModel,
+  deleteSchool as deleteSchoolModel,
+} from "../models/schoolModel.js";
 import db from './../db.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// ✅ Get schools with pagination + search
 export function getSchools(req, res) {
   const { q = "", page = 1, limit = 6 } = req.query;
 
   getAllSchools((err, results) => {
-  if (err) {
-    console.error("❌ DB error in getAllSchools:", err);
-    return res.status(500).json({ error: err.message });
-  }
+    if (err) {
+      console.error("❌ DB error in getAllSchools:", err);
+      return res.status(500).json({ error: err.message });
+    }
 
-  if (!results || results.length === 0) {
-    const jsonData = readFileSync(join(__dirname, "../schools.json"), "utf-8");
-    results = JSON.parse(jsonData);
-  }
+    let schools = results;
+    if (!schools || schools.length === 0) {
+      const jsonData = readFileSync(join(__dirname, "../schools.json"), "utf-8");
+      schools = JSON.parse(jsonData);
+    }
 
-   const search = (q || "").toLowerCase();
-
-const filtered = results.filter((school) => {
-  const name = school?.name || ""; 
-  const city = school?.city || ""; 
-
-  return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
-});
+    const search = (q || "").toLowerCase();
+    const filtered = schools.filter((s) => {
+      const name = s?.name || "";
+      const city = s?.city || "";
+      return (
+        name.toLowerCase().includes(search) ||
+        city.toLowerCase().includes(search)
+      );
+    });
 
     const pageNum = parseInt(page);
     const pageLimit = parseInt(limit);
@@ -42,79 +56,74 @@ const filtered = results.filter((school) => {
   });
 }
 
-
+// ✅ Create a new school
 export function createSchool(req, res) {
   const safeValue = (v) => v ?? "";
 
   const { name, address, city, state, contact, email_id } = req.body;
   const image = req.file ? req.file.filename : "";
 
-  const sql = `
-    INSERT INTO schools (name, address, city, state, contact, image, email_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
+  addSchool(
+    {
+      name: safeValue(name),
+      address: safeValue(address),
+      city: safeValue(city),
+      state: safeValue(state),
+      contact: safeValue(contact),
+      image: safeValue(image),
+      email_id: safeValue(email_id),
+    },
+    (err, result) => {
+      if (err) {
+        console.error("❌ Insert error:", err);
+        return res.status(500).json({ error: err.message });
+      }
 
-  db.query(sql, [
-  safeValue(name),
-  safeValue(address),
-  safeValue(city),
-  safeValue(state),
-  safeValue(contact),
-  safeValue(image),
-  safeValue(email_id),
-], (err, result) => {
-  if (err) {
-    console.error("❌ Insert error:", err); 
-    return res.status(500).json({ error: err.message }); 
-  }
-
-    const insertedId = result.insertId;
-    db.query('SELECT * FROM schools WHERE id=?', [insertedId], (err2, rows) => {
-      if (err2) return res.status(500).json(err2);
-      res.json({ message: "School added successfully", school: rows[0] });
-    });
-  });
+      const insertedId = result.insertId;
+      getSchoolByIdModel(insertedId, (err2, rows) => {
+        if (err2) return res.status(500).json(err2);
+        res.json({ message: "School added successfully", school: rows[0] });
+      });
+    }
+  );
 }
 
+// ✅ Update school
 export function updateSchool(req, res) {
   const { id } = req.params;
   const { name, address, city, state, contact, email_id } = req.body;
-  const updatedImage = req.file ? req.file.filename : undefined;
+  const updatedImage = req.file ? req.file.filename : null;
 
-  let sql, params;
-  if (updatedImage) {
-    sql = `UPDATE schools SET name=?, address=?, city=?, state=?, contact=?, email_id=?, image=? WHERE id=?`;
-    params = [name, address, city, state, contact, email_id, updatedImage, id];
-  } else {
-    sql = `UPDATE schools SET name=?, address=?, city=?, state=?, contact=?, email_id=? WHERE id=?`;
-    params = [name, address, city, state, contact, email_id, id];
-  }
+  updateSchoolModel(
+    id,
+    { name, address, city, state, contact, email_id, image: updatedImage },
+    (err, result) => {
+      if (err) return res.status(500).json(err);
 
-  db.query(sql, params, (err, result) => {
-    if (err) return res.status(500).json(err);
-
-    db.query('SELECT * FROM schools WHERE id=?', [id], (err2, rows) => {
-      if (err2) return res.status(500).json(err2);
-      res.json({ message: "School updated successfully", school: rows[0] }); 
-    });
-  });
+      getSchoolByIdModel(id, (err2, rows) => {
+        if (err2) return res.status(500).json(err2);
+        res.json({ message: "School updated successfully", school: rows[0] });
+      });
+    }
+  );
 }
 
+// ✅ Delete school
 export function deleteSchool(req, res) {
   const { id } = req.params;
-  const sql = "DELETE FROM schools WHERE id=?";
-  db.query(sql, [id], (err, result) => {
+  deleteSchoolModel(id, (err, result) => {
     if (err) return res.status(500).json(err);
     res.json({ message: "School deleted successfully" });
   });
 }
 
+// ✅ Get school by ID
 export function getSchoolById(req, res) {
   const { id } = req.params;
-  const sql = "SELECT * FROM schools WHERE id=?";
-  db.query(sql, [id], (err, results) => {
+  getSchoolByIdModel(id, (err, results) => {
     if (err) return res.status(500).json(err);
-    if (results.length === 0) return res.status(404).json({ message: "School not found" });
+    if (results.length === 0)
+      return res.status(404).json({ message: "School not found" });
     res.json(results[0]);
   });
 }
