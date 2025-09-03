@@ -1,6 +1,10 @@
 import db from '../db.js';
+
 export function getAllSchools(callback) {
-  db.query('SELECT * FROM schools', callback);
+  db.query("SELECT * FROM schools", (err, results) => {
+    if (err) return callback(err, null);
+    callback(null, results);
+  });
 }
 
 export function addSchool(school, callback) {

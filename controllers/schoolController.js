@@ -8,12 +8,15 @@ export function getSchools(req, res) {
   const { q = "", page = 1, limit = 6 } = req.query;
 
   getAllSchools((err, results) => {
-    if (err) return res.status(500).json(err);
+  if (err) {
+    console.error("❌ DB error in getAllSchools:", err);
+    return res.status(500).json({ error: err.message });
+  }
 
-    if (!results || results.length === 0) {
-      const jsonData = readFileSync(join(__dirname, "../schools.json"), "utf-8");
-      results = JSON.parse(jsonData);
-    }
+  if (!results || results.length === 0) {
+    const jsonData = readFileSync(join(__dirname, "../schools.json"), "utf-8");
+    results = JSON.parse(jsonData);
+  }
 
    const search = (q || "").toLowerCase();
 
