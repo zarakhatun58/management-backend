@@ -15,14 +15,13 @@ export function getSchools(req, res) {
       results = JSON.parse(jsonData);
     }
 
-   const search = (q || "").toLowerCase();
+    const search = (q || "").toLowerCase();
 
-const filtered = results.filter((school) => {
-  const name = school?.name || ""; 
-  const city = school?.city || ""; 
-
-  return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
-});
+    const filtered = results.filter((school) => {
+      const name = school?.name ? String(school.name) : "";
+      const city = school?.city ? String(school.city) : "";
+      return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
+    });
 
     const pageNum = parseInt(page);
     const pageLimit = parseInt(limit);
@@ -74,7 +73,7 @@ export function updateSchool(req, res) {
 
     db.query('SELECT * FROM schools WHERE id=?', [id], (err2, rows) => {
       if (err2) return res.status(500).json(err2);
-      res.json({ message: "School updated successfully", school: rows[0] }); 
+      res.json({ message: "School updated successfully", school: rows[0] });
     });
   });
 }
