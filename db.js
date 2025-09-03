@@ -4,7 +4,7 @@ import path from "path";
 dotenv.config()
 
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: process.env.MYSQLHOST || process.env.DB_HOST,
   port: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
   user: process.env.MYSQLUSER || process.env.DB_USER,
@@ -15,12 +15,13 @@ const db = mysql.createConnection({
   queueLimit: 0
 });
 
-db.connect((err) => {
+db.getConnection((err, connection) => {
   if (err) {
     console.error("❌ MySQL connection failed:", err.message);
     process.exit(1);
   }
-  console.log("✅ MySQL Connected:", db.config.host, db.config.database);
+  console.log("✅ MySQL Connected:", connection.config.host, connection.config.database);
+  connection.release();
 });
 
 export default db;
