@@ -9,15 +9,19 @@ export function getSchools(req, res) {
 
   getAllSchools((err, results) => {
     if (err) return res.status(500).json(err);
-    if (results.length === 0) {
-      const jsonData = readFileSync(join(__dirname, "../schools.json"));
+
+    if (!results || results.length === 0) {
+      const jsonData = readFileSync(join(__dirname, "../schools.json"), "utf-8");
       results = JSON.parse(jsonData);
     }
-    const filtered = results.filter(
-      (school) =>
-        school.name.toLowerCase().includes(q.toLowerCase()) ||
-        school.city.toLowerCase().includes(q.toLowerCase())
-    );
+
+    const search = q.toLowerCase();
+
+    const filtered = results.filter((school) => {
+      const name = school.name || "";
+      const city = school.city || "";
+      return name.toLowerCase().includes(search) || city.toLowerCase().includes(search);
+    });
 
     const pageNum = parseInt(page);
     const pageLimit = parseInt(limit);
@@ -33,6 +37,7 @@ export function getSchools(req, res) {
     });
   });
 }
+
 
 export function createSchool(req, res) {
   const { name, address, city, state, contact, email_id } = req.body;
