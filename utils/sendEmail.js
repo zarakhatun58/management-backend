@@ -6,12 +6,15 @@ export const sendEmail = async (to, subject, html) => {
     console.log("➡️ To:", to);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST, // smtp-relay.brevo.com
-      port: process.env.EMAIL_PORT, // 587
-      secure: false, // TLS over 587 (use true if port 465)
+      host: process.env.EMAIL_HOST, 
+      port: process.env.EMAIL_PORT,     
+      secure: false,                   
       auth: {
-        user: process.env.EMAIL_USER, // Brevo login
-        pass: process.env.EMAIL_PASS, // Brevo SMTP key
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS,   
+      },
+      tls: {
+        rejectUnauthorized: false, 
       },
     });
 
