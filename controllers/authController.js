@@ -88,7 +88,7 @@ export const forgotPassword = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); 
 
     await query("UPDATE users SET otp = ?, otp_expiry = ? WHERE email = ?", [
       otp,
